@@ -84,15 +84,17 @@ At the moment it's only been tested in Ubuntu with a small selection of output.
 
 ## Usage
 
+due to https://github.com/jeff-knurek/tfarbe/issues/3 need to pass `-no-color` arg as a workaround. This should be resolved soon
+
 ```
-terraform plan | tfarbe
+terraform plan -no-color | tfarbe
 ```
 
 ### with Docker
 
 ```
 docker build . -t tfarbe
-terraform plan ... | docker run -i --rm tfarbe
+terraform plan -no-color ... | docker run -i --rm tfarbe
 ```
 
 ## License
