@@ -1,0 +1,29 @@
+ # module.apps.kubernetes_service.service will be updated in-place
+  ~ resource "kubernetes_service" "service" {
+        id                    = "some-app"
+        load_balancer_ingress = []
+
+      ~ metadata {
+            annotations      = {}
+            generation       = 0
+          ~ labels           = {
+                "app.kubernetes.io/managed-by" = "terraform"
+              ~ "app.kubernetes.io/version"    = "latest" -> "1.0.1"
+            }
+
+  # module.apps.kubernetes_deployment.deployment is tainted, so must be replaced
+-/+ resource "kubernetes_deployment" "deployment" {
+      ~ id               = "some-app" -> (known after apply)
+        wait_for_rollout = true
+
+              ~ spec {
+                  - active_deadline_seconds          = 0 -> null
+                  - automount_service_account_token  = false -> null
+                    dns_policy                       = "ClusterFirst"
+                    host_ipc                         = false
+                    host_network                     = false
+                    host_pid                         = false
+                  + hostname                         = (known after apply)
+                  + node_name                        = (known after apply)
+                    restart_policy                   = "Always"
+                  + service_account_name             = (known after apply)
