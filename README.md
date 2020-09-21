@@ -82,6 +82,19 @@ Binaries (should) be available on the [Release page](/releases) for both Linux a
 
 At the moment it's only been tested in Ubuntu with a small selection of output.
 
+## Usage
+
+```
+terraform plan | tfarbe
+```
+
+### with Docker
+
+```
+docker build . -t tfarbe
+terraform plan ... | docker run -i --rm tfarbe
+```
+
 ## License
 
 This project is released under the [MIT license](LICENSE).
