@@ -65,13 +65,16 @@ terraform plan ... | tfarbe
 ### with Docker
 
 ```
+git clone https://github.com/jeff-knurek/tfarbe.git
+cd tfarbe
 docker build . -t tfarbe
+....
 terraform plan ... | docker run -i --rm tfarbe
 ```
 
 ### Helpful bash addition
 
-Add this to your `.bash_profile`/`.bashrc`/... accordingly
+Add this to your `.bash_profile`/`.bashrc`/`...` accordingly
 
 ```
 terraform() {
