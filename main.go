@@ -60,7 +60,7 @@ func processLine(raw string, out io.Writer) {
 		new := strings.Replace(cleaned, "-", "", 1)
 		toPrint = Red("-" + new)
 	case "#":
-		toPrint = strings.TrimSpace(cleaned)
+		toPrint = trimmed
 	default:
 		toPrint = raw
 	}
