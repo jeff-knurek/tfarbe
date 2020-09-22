@@ -7,11 +7,10 @@ import (
 
 func Test_processLine(t *testing.T) {
 	tests := []struct {
-		name    string
-		text    string
-		out     *bytes.Buffer
-		want    string
-		wantErr bool
+		name string
+		text string
+		out  *bytes.Buffer
+		want string
 	}{
 		{
 			name: "empty",
@@ -19,7 +18,6 @@ func Test_processLine(t *testing.T) {
 			out:  &bytes.Buffer{},
 			want: `
 `,
-			wantErr: false,
 		},
 		{
 			name: "whitespace",
@@ -27,7 +25,6 @@ func Test_processLine(t *testing.T) {
 			out:  &bytes.Buffer{},
 			want: "  " + `
 `,
-			wantErr: false,
 		},
 		{
 			name: "new resource",
@@ -35,7 +32,6 @@ func Test_processLine(t *testing.T) {
 			out:  &bytes.Buffer{},
 			want: `# module.example
 `,
-			wantErr: false,
 		},
 		{
 			name: "no change",
@@ -43,7 +39,6 @@ func Test_processLine(t *testing.T) {
 			out:  &bytes.Buffer{},
 			want: `    id  = "some string"
 `,
-			wantErr: false,
 		},
 		{
 			name: "added line",
@@ -51,7 +46,6 @@ func Test_processLine(t *testing.T) {
 			out:  &bytes.Buffer{},
 			want: `[32m+    id  = "some string"[0m
 `,
-			wantErr: false,
 		},
 		{
 			name: "removed line",
@@ -59,7 +53,6 @@ func Test_processLine(t *testing.T) {
 			out:  &bytes.Buffer{},
 			want: `[31m-      item = 0 -> null[0m
 `,
-			wantErr: false,
 		},
 		{
 			name: "changed line",
@@ -67,7 +60,6 @@ func Test_processLine(t *testing.T) {
 			out:  &bytes.Buffer{},
 			want: `[33m~   "new/version"    = [0m[31m"latest" -> [0m[32m"1.0.1"[0m
 `,
-			wantErr: false,
 		},
 		{
 			name: "complex changed line",
@@ -75,7 +67,6 @@ func Test_processLine(t *testing.T) {
 			out:  &bytes.Buffer{},
 			want: `[33m~   "new/version = some -> thing"    = "latest" -> "1.0.1"[0m
 `,
-			wantErr: false,
 		},
 		{
 			name: "cannot edit in place",
@@ -83,7 +74,6 @@ func Test_processLine(t *testing.T) {
 			out:  &bytes.Buffer{},
 			want: `[31m-      item = 0 -> null[0m
 `,
-			wantErr: false,
 		},
 		{
 			name: "pre-existing color",
@@ -91,7 +81,6 @@ func Test_processLine(t *testing.T) {
 			out: &bytes.Buffer{},
 			want: `[32m+    id  = "some string"[0m
 `,
-			wantErr: false,
 		},
 	}
 	for _, tt := range tests {
