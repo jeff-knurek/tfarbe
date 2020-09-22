@@ -85,6 +85,14 @@ func Test_processLine(t *testing.T) {
 `,
 			wantErr: false,
 		},
+		{
+			name: "pre-existing color",
+			text: "   [32m+[0m id  = \"some string\"",
+			out: &bytes.Buffer{},
+			want: `[32m+    id  = "some string"[0m
+`,
+			wantErr: false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -93,6 +101,39 @@ func Test_processLine(t *testing.T) {
 			if got != tt.want {
 				t.Errorf("output is now aligned. \nGot:  %v, \nwant: %v", got, tt.want)
 				// t.Errorf("length  \nGot:  %v, \nwant: %v", len(got), len(tt.want))
+			}
+		})
+	}
+}
+
+func Test_cleanRawInput(t *testing.T) {
+	type args struct {
+	}
+	tests := []struct {
+		name string
+		raw  string
+		want string
+	}{
+		{
+			name: "only whitespace",
+			raw:  "     ",
+			want: "     ",
+		},
+		{
+			name: "no color with space",
+			raw:  "    id  = \"some string\"   ",
+			want: "    id  = \"some string\"   ",
+		},
+		{
+			name: "partial colored",
+			raw: "   [32m+[0m id  = \"some string\"",
+			want: "   + id  = \"some string\"",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := cleanRawInput(tt.raw); got != tt.want {
+				t.Errorf("cleanRawInput(%s) \ngot:  %v, \nwant: %v", tt.name, got, tt.want)
 			}
 		})
 	}
