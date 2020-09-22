@@ -13,19 +13,6 @@ Also formats the ouput for markdown diff.
 
 For example, this:
 ```
- # module.apps.kubernetes_service.service will be updated in-place
-  ~ resource "kubernetes_service" "service" {
-        id                    = "some-app"
-        load_balancer_ingress = []
-
-      ~ metadata {
-            annotations      = {}
-            generation       = 0
-          ~ labels           = {
-                "app.kubernetes.io/managed-by" = "terraform"
-              ~ "app.kubernetes.io/version"    = "latest" -> "1.0.1"
-            }
-
   # module.apps.kubernetes_deployment.deployment is tainted, so must be replaced
 -/+ resource "kubernetes_deployment" "deployment" {
       ~ id               = "some-app" -> (known after apply)
@@ -47,19 +34,6 @@ For example, this:
 becomes:
 
 ```diff
-# module.apps.kubernetes_service.service will be updated in-place
-~   resource "kubernetes_service" "service" {
-        id                    = "some-app"
-        load_balancer_ingress = []
-
-~       metadata {
-            annotations      = {}
-            generation       = 0
-~           labels           = {
-                "app.kubernetes.io/managed-by" = "terraform"
-~               "app.kubernetes.io/version"    = "latest" -> "1.0.1"
-            }
-
 # module.apps.kubernetes_deployment.deployment is tainted, so must be replaced
 -/+ resource "kubernetes_deployment" "deployment" {
 ~       id               = "some-app" -> (known after apply)
