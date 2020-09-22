@@ -7,11 +7,10 @@ import (
 
 func Test_processLine(t *testing.T) {
 	tests := []struct {
-		name    string
-		text    string
-		out     *bytes.Buffer
-		want    string
-		wantErr bool
+		name string
+		text string
+		out  *bytes.Buffer
+		want string
 	}{
 		{
 			name: "empty",
@@ -19,7 +18,6 @@ func Test_processLine(t *testing.T) {
 			out:  &bytes.Buffer{},
 			want: `
 `,
-			wantErr: false,
 		},
 		{
 			name: "whitespace",
@@ -27,7 +25,6 @@ func Test_processLine(t *testing.T) {
 			out:  &bytes.Buffer{},
 			want: "  " + `
 `,
-			wantErr: false,
 		},
 		{
 			name: "new resource",
@@ -35,7 +32,6 @@ func Test_processLine(t *testing.T) {
 			out:  &bytes.Buffer{},
 			want: `# module.example
 `,
-			wantErr: false,
 		},
 		{
 			name: "no change",
@@ -43,7 +39,6 @@ func Test_processLine(t *testing.T) {
 			out:  &bytes.Buffer{},
 			want: `    id  = "some string"
 `,
-			wantErr: false,
 		},
 		{
 			name: "added line",
@@ -51,7 +46,6 @@ func Test_processLine(t *testing.T) {
 			out:  &bytes.Buffer{},
 			want: `[32m+    id  = "some string"[0m
 `,
-			wantErr: false,
 		},
 		{
 			name: "removed line",
@@ -59,7 +53,6 @@ func Test_processLine(t *testing.T) {
 			out:  &bytes.Buffer{},
 			want: `[31m-      item = 0 -> null[0m
 `,
-			wantErr: false,
 		},
 		{
 			name: "changed line",
@@ -67,7 +60,6 @@ func Test_processLine(t *testing.T) {
 			out:  &bytes.Buffer{},
 			want: `[33m~   "new/version"    = [0m[31m"latest" -> [0m[32m"1.0.1"[0m
 `,
-			wantErr: false,
 		},
 		{
 			name: "complex changed line",
@@ -75,7 +67,6 @@ func Test_processLine(t *testing.T) {
 			out:  &bytes.Buffer{},
 			want: `[33m~   "new/version = some -> thing"    = "latest" -> "1.0.1"[0m
 `,
-			wantErr: false,
 		},
 		{
 			name: "cannot edit in place",
@@ -83,7 +74,13 @@ func Test_processLine(t *testing.T) {
 			out:  &bytes.Buffer{},
 			want: `[31m-      item = 0 -> null[0m
 `,
-			wantErr: false,
+		},
+		{
+			name: "pre-existing color",
+			text: "   [32m+[0m id  = \"some string\"",
+			out: &bytes.Buffer{},
+			want: `[32m+    id  = "some string"[0m
+`,
 		},
 	}
 	for _, tt := range tests {
@@ -93,6 +90,39 @@ func Test_processLine(t *testing.T) {
 			if got != tt.want {
 				t.Errorf("output is now aligned. \nGot:  %v, \nwant: %v", got, tt.want)
 				// t.Errorf("length  \nGot:  %v, \nwant: %v", len(got), len(tt.want))
+			}
+		})
+	}
+}
+
+func Test_cleanRawInput(t *testing.T) {
+	type args struct {
+	}
+	tests := []struct {
+		name string
+		raw  string
+		want string
+	}{
+		{
+			name: "only whitespace",
+			raw:  "     ",
+			want: "     ",
+		},
+		{
+			name: "no color with space",
+			raw:  "    id  = \"some string\"   ",
+			want: "    id  = \"some string\"   ",
+		},
+		{
+			name: "partial colored",
+			raw: "   [32m+[0m id  = \"some string\"",
+			want: "   + id  = \"some string\"",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := cleanRawInput(tt.raw); got != tt.want {
+				t.Errorf("cleanRawInput(%s) \ngot:  %v, \nwant: %v", tt.name, got, tt.want)
 			}
 		})
 	}

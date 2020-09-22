@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"regexp"
 	"strings"
 
 	. "github.com/logrusorgru/aurora"
@@ -25,17 +26,19 @@ func iterateInput(input io.Reader) {
 
 // process in-coming text
 func processLine(raw string, out io.Writer) {
-	trimmed := strings.TrimSpace(raw)
+	var toPrint interface{}
+	cleaned := cleanRawInput(raw)
+
+	trimmed := strings.TrimSpace(cleaned)
 	if len(trimmed) < 1 {
 		fmt.Fprintln(out, raw)
 		return
 	}
 
 	firstChar := string(trimmed[0])
-	var toPrint interface{}
 	switch firstChar {
 	case "~":
-		ch := strings.Replace(raw, "~", "", 1)
+		ch := strings.Replace(cleaned, "~", "", 1)
 		sp := strings.SplitAfter(ch, " -> ")
 		if len(sp) != 2 {
 			toPrint = Yellow("~" + ch)
@@ -51,10 +54,10 @@ func processLine(raw string, out io.Writer) {
 		old := sp2[1]
 		toPrint = fmt.Sprintf("%s%s%s", Yellow(ch), Red(old), Green(new))
 	case "+":
-		new := strings.Replace(raw, "+", "", 1)
+		new := strings.Replace(cleaned, "+", "", 1)
 		toPrint = Green("+" + new)
 	case "-":
-		new := strings.Replace(raw, "-", "", 1)
+		new := strings.Replace(cleaned, "-", "", 1)
 		toPrint = Red("-" + new)
 	case "#":
 		toPrint = trimmed
@@ -63,4 +66,10 @@ func processLine(raw string, out io.Writer) {
 	}
 	fmt.Fprintln(out, toPrint)
 	return
+}
+
+func cleanRawInput(raw string) string {
+	ansi := "[\u001B\u009B][[\\]()#;?]*(?:(?:(?:[a-zA-Z\\d]*(?:;[a-zA-Z\\d]*)*)?\u0007)|(?:(?:\\d{1,4}(?:;\\d{0,4})*)?[\\dA-PRZcf-ntqry=><~]))"
+	re := regexp.MustCompile(ansi)
+	return re.ReplaceAllString(raw, "")
 }

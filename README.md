@@ -1,9 +1,11 @@
 # tfarbe
-Inspired from: https://github.com/coinbase/terraform-landscape
-
 Add color to Terraform 12 plan output.
 
-**NOTE**: if you're using terraform <=11, this tool will not help and you should use terraform-landscape.
+Inspired from: https://github.com/coinbase/terraform-landscape
+
+**NOTE**: if you're using terraform v11, tfarbe will not help and you should use `terraform-landscape`.
+
+### Example of output
 
 <img src="./example/screenshot.png" width="65%" alt="Improved Terraform plan output" />
 
@@ -11,19 +13,6 @@ Also formats the ouput for markdown diff.
 
 For example, this:
 ```
- # module.apps.kubernetes_service.service will be updated in-place
-  ~ resource "kubernetes_service" "service" {
-        id                    = "some-app"
-        load_balancer_ingress = []
-
-      ~ metadata {
-            annotations      = {}
-            generation       = 0
-          ~ labels           = {
-                "app.kubernetes.io/managed-by" = "terraform"
-              ~ "app.kubernetes.io/version"    = "latest" -> "1.0.1"
-            }
-
   # module.apps.kubernetes_deployment.deployment is tainted, so must be replaced
 -/+ resource "kubernetes_deployment" "deployment" {
       ~ id               = "some-app" -> (known after apply)
@@ -45,19 +34,6 @@ For example, this:
 becomes:
 
 ```diff
-# module.apps.kubernetes_service.service will be updated in-place
-~   resource "kubernetes_service" "service" {
-        id                    = "some-app"
-        load_balancer_ingress = []
-
-~       metadata {
-            annotations      = {}
-            generation       = 0
-~           labels           = {
-                "app.kubernetes.io/managed-by" = "terraform"
-~               "app.kubernetes.io/version"    = "latest" -> "1.0.1"
-            }
-
 # module.apps.kubernetes_deployment.deployment is tainted, so must be replaced
 -/+ resource "kubernetes_deployment" "deployment" {
 ~       id               = "some-app" -> (known after apply)
@@ -78,23 +54,36 @@ becomes:
 
 ## Install
 
-Binaries (should) be available on the [Release page](/releases) for both Linux and Mac. You can simple copy one of these binaries to your PATH.
-
-At the moment it's only been tested in Ubuntu with a small selection of output.
+Binaries (should) be available on the [Release page](https://github.com/jeff-knurek/tfarbe/releases/) for both Linux and Mac. You can simple copy one of these binaries to your PATH.
 
 ## Usage
 
-due to https://github.com/jeff-knurek/tfarbe/issues/3 need to pass `-no-color` arg as a workaround. This should be resolved soon
-
 ```
-terraform plan -no-color | tfarbe
+terraform plan ... | tfarbe
 ```
 
 ### with Docker
 
 ```
+git clone https://github.com/jeff-knurek/tfarbe.git
+cd tfarbe
 docker build . -t tfarbe
-terraform plan -no-color ... | docker run -i --rm tfarbe
+....
+terraform plan ... | docker run -i --rm tfarbe
+```
+
+### Helpful bash addition
+
+Add this to your `.bash_profile`/`.bashrc`/`...` accordingly
+
+```
+terraform() {
+    if [[ $1 == "plan" ]]; then
+        command terraform "$@" | docker run --rm -i tfarbe
+    else
+        command terraform "$@"
+    fi
+}
 ```
 
 ## License
