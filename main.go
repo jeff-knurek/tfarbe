@@ -28,6 +28,10 @@ func iterateInput(input io.Reader) {
 func processLine(raw string, out io.Writer) {
 	var toPrint interface{}
 	cleaned := cleanRawInput(raw)
+	if len(cleaned) < 1 && len(raw) > 0 {
+		// filtered text shouldn't print a new line
+		return
+	}
 
 	trimmed := strings.TrimSpace(cleaned)
 	if len(trimmed) < 1 {
@@ -71,5 +75,11 @@ func processLine(raw string, out io.Writer) {
 func cleanRawInput(raw string) string {
 	ansi := "[\u001B\u009B][[\\]()#;?]*(?:(?:(?:[a-zA-Z\\d]*(?:;[a-zA-Z\\d]*)*)?\u0007)|(?:(?:\\d{1,4}(?:;\\d{0,4})*)?[\\dA-PRZcf-ntqry=><~]))"
 	re := regexp.MustCompile(ansi)
-	return re.ReplaceAllString(raw, "")
+	nocolor := re.ReplaceAllString(raw, "")
+
+	refreshing := "Refreshing state... "
+	if strings.Contains(nocolor, refreshing) {
+		return ""
+	}
+	return nocolor
 }
