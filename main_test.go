@@ -82,6 +82,12 @@ func Test_processLine(t *testing.T) {
 			want: `[32m+    id  = "some string"[0m
 `,
 		},
+		{
+			name: "filter refreshing state",
+			text: "module.apps.kubernetes_config_map.config-map: Refreshing state... [id=id1]",
+			out:  &bytes.Buffer{},
+			want: "", //no new line
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
