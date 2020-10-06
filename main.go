@@ -12,14 +12,27 @@ import (
 )
 
 func main() {
-	iterateInput(os.Stdin)
+	iterateInput(os.Stdin, os.Stdout)
 }
 
-func iterateInput(input io.Reader) {
+func iterateInput(input io.Reader, out io.Writer) {
+	skipLines := false
+	key := ""
 	scanner := bufio.NewScanner(input)
 	for scanner.Scan() {
 		ln := scanner.Text()
-		processLine(ln, os.Stdout)
+		if strings.TrimSpace(ln) == key {
+			skipLines = false
+		}
+		if skipLines {
+			fmt.Fprintln(out, ln)
+		} else {
+			processLine(ln, out)
+		}
+		if strings.Contains(ln, "<<~") {
+			skipLines = true
+			key = after(ln, "<<~")
+		}
 	}
 	return
 }
@@ -82,4 +95,17 @@ func cleanRawInput(raw string) string {
 		return ""
 	}
 	return nocolor
+}
+
+// Get substring after a string.
+func after(value string, a string) string {
+	pos := strings.LastIndex(value, a)
+	if pos == -1 {
+		return ""
+	}
+	adjustedPos := pos + len(a)
+	if adjustedPos >= len(value) {
+		return ""
+	}
+	return value[adjustedPos:]
 }

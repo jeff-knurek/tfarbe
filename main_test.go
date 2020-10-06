@@ -133,3 +133,81 @@ func Test_cleanRawInput(t *testing.T) {
 		})
 	}
 }
+
+func Test_iterateInput(t *testing.T) {
+	tests := []struct {
+		name    string
+		input   string
+		out     *bytes.Buffer
+		wantOut string
+	}{
+		{
+			name:    "empty",
+			input:   "",
+			out:     &bytes.Buffer{},
+			wantOut: ``,
+		},
+		{
+			name: "example",
+			input: `
+  # module.apps.kubernetes_deployment.deployment is tainted, so must be replaced
+-/+ resource "kubernetes_deployment" "deployment" {
+      ~ id               = "some-app" -> (known after apply)
+        wait_for_rollout = true
+
+              ~ spec {
+                  - active_deadline_seconds          = 0 -> null
+`,
+			out: &bytes.Buffer{},
+			wantOut: `
+# module.apps.kubernetes_deployment.deployment is tainted, so must be replaced
+[31m-/+ resource "kubernetes_deployment" "deployment" {[0m
+[33m~       id               = [0m[31m"some-app" -> [0m[32m(known after apply)[0m
+        wait_for_rollout = true
+
+[33m~               spec {[0m
+[31m-                   active_deadline_seconds          = 0 -> null[0m
+`,
+		},
+		{
+			name: "multiline example",
+			input: `
+ # local_file.foo will be created
++ resource "local_file" "foo" {
+    + content              = <<~EOT
+        can:
+          enter:
+          - yaml
+          - or
+          + anything
+        EOT
+    + directory_permission = "0777"
+`,
+			out: &bytes.Buffer{},
+			wantOut: `
+# local_file.foo will be created
+[32m+ resource "local_file" "foo" {[0m
+[32m+     content              = <<~EOT[0m
+        can:
+          enter:
+          - yaml
+          - or
+          + anything
+        EOT
+[32m+     directory_permission = "0777"[0m
+`,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var stdin bytes.Buffer
+			stdin.Write([]byte(tt.input))
+			iterateInput(&stdin, tt.out)
+			got := tt.out.String()
+			if got != tt.wantOut {
+				t.Errorf("output for %s is now aligned. \nGot:  %v, \nwant: %v", tt.name, got, tt.wantOut)
+				t.Errorf("length  \nGot:  %v, \nwant: %v", len(got), len(tt.wantOut))
+			}
+		})
+	}
+}

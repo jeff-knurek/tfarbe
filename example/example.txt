@@ -27,3 +27,18 @@
                   + node_name                        = (known after apply)
                     restart_policy                   = "Always"
                   + service_account_name             = (known after apply)
+
+# local_file.foo will be created
+  + resource "local_file" "foo" {
+    + content              = <<~EOT
+        can:
+          enter:
+          - yaml
+          - or
+          + anything
+        EOT
+    + directory_permission = "0777"
+    + file_permission      = "0777"
+    + filename             = "./foo.out"
+    + id                   = (known after apply)
+  }
